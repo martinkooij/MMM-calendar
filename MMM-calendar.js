@@ -520,8 +520,8 @@ Module.register("MMM-calendar", {
 				event.today = event.startDate >= today && event.startDate < today + 24 * 60 * 60 * 1000;
 				
 				/* Urgency tags for LED strng [MK] */
-				event.nearing = event.startDate < now + 24 * 60 * 60 * 1000 ;
-				event.almost = event.startDate < now + 2 * 60 * 60 * 1000 ;
+				event.nearing = event.startDate < moment(now) + 24 * 60 * 60 * 1000 ;
+				event.almost = event.startDate < moment(now) + 2 * 60 * 60 * 1000 ;
 
 				/* if sliceMultiDayEvents is set to true, multiday events (events exceeding at least one midnight) are sliced into days,
 				 * otherwise, esp. in dateheaders mode it is not clear how long these events are.
