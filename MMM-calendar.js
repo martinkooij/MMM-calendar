@@ -245,6 +245,8 @@ Module.register("MMM-calendar", {
 		}
 
 		let lastSeenDate = "";
+		
+		let foundFirstEvent = false ;
 
 		events.forEach((event, index) => {
 			const dateAsString = moment(event.startDate, "x").format(this.config.dateFormat);
@@ -275,15 +277,18 @@ Module.register("MMM-calendar", {
 				}
 			}
 			
-			if (index == 0) {
-				if (event.almost) {
+			if (!foundFirstEvent || index +1 >= this.config.maximumEntries) {
+				if (event.almost && !event.fullDayEvent) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: "ALMOST"} );
+					foundFirstEvent = true ;
 					console.log("ALMOST");
-				} else if (event.nearing) {
+				} else if (event.nearing && !event.fullDayEvent) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: "NEARING"} );
+					foundFirstEvent = true ;
 					console.log("NEARING");
-				} else {
+				} else if (!event.fullDayEvent || index +1 == this.config.maximumEntries) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: -1} );
+					foundFirstEvent = true ;
 					console.log("NOTHING CLOSE") ;
 				};
 			};
@@ -426,7 +431,7 @@ Module.register("MMM-calendar", {
 					}
 					// For full day events we use the fullDayEventDateFormat
 					if (event.fullDayEvent) {
-						//subtract one second so that fullDayEvents end at 23:59:59, and not at 0:00:00 one the next day
+						//subtract one second so that AL end at 23:59:59, and not at 0:00:00 one the next day
 						event.endDate -= ONE_SECOND;
 						timeWrapper.innerHTML = CalendarUtils.capFirst(moment(event.startDate, "x").format(this.config.fullDayEventDateFormat));
 					} else if (this.config.getRelative > 0 && event.startDate < now) {
