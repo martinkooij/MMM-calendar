@@ -247,6 +247,7 @@ Module.register("MMM-calendar", {
 		let lastSeenDate = "";
 		
 		let foundFirstEvent = false ;
+		let lastEventIndex = events.length - 1 ;
 
 		events.forEach((event, index) => {
 			const dateAsString = moment(event.startDate, "x").format(this.config.dateFormat);
@@ -276,21 +277,24 @@ Module.register("MMM-calendar", {
 					lastSeenDate = dateAsString;
 				}
 			}
-			
-			if (!foundFirstEvent || index +1 >= this.config.maximumEntries) {
+		
+			if (!foundFirstEvent || (!foundFirstEvent && index == lastEventIndex)) {
+
 				if (event.almost && !event.fullDayEvent) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: "ALMOST"} );
 					foundFirstEvent = true ;
-					console.log("ALMOST");
+					console.log(new Date().toLocaleTimeString() + ": ALMOST ->" + index + event.url);
 				} else if (event.nearing && !event.fullDayEvent) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: "NEARING"} );
 					foundFirstEvent = true ;
-					console.log("NEARING");
-				} else if (!event.fullDayEvent || index +1 == this.config.maximumEntries) {
+					console.log(new Date().toLocaleTimeString() + ": NEARING ->" + index + event.url);
+				} else if (index == lastEventIndex || !event.fullDayEvent) {
 					this.sendNotification('SET_LCD_BACKLIGHT', {command: -1} );
 					foundFirstEvent = true ;
-					console.log("NOTHING CLOSE") ;
+					console.log(new Date().toLocaleTimeString() + ": NOTHING CLOSE ->" + index + event.url) ;
 				};
+				
+				
 			};
 				
 
@@ -630,7 +634,7 @@ Module.register("MMM-calendar", {
 				event.tomorrow = !event.today && event.startDate >= today + ONE_DAY && event.startDate < today + 2 * ONE_DAY;
 				event.dayAfterTomorrow = !event.tomorrow && event.startDate >= today + ONE_DAY * 2 && event.startDate < today + 3 * ONE_DAY;
 				/* Urgency tags for LED strings [MK] */
-				event.nearing = event.startDate < moment(now) + 24 * 60 * 60 * 1000 ;
+				event.nearing = event.startDate < moment(now) + 12 * 60 * 60 * 1000 ;
 				event.almost = event.startDate < moment(now) + 2 * 60 * 60 * 1000 ;
 				
 				/* if sliceMultiDayEvents is set to true, multiday events (events exceeding at least one midnight) are sliced into days,
